@@ -1,0 +1,101 @@
+[
+  {
+    "id": "cleansing",
+    "title": "Чистка лица (атравматичная)",
+    "category": "Уход",
+    "price": "3 500 ₽",
+    "duration": "60 мин.",
+    "description": "Комплексная процедура, направленная на глубокое очищение кожи без механического повреждения.",
+    "image": "/img/chistka.webp",
+    "indications": ["Закупорованные поры", "Тусклый цвет лица"],
+    "contraindications": ["Воспаления", "Инфекции"]
+  },
+  {
+    "id": "peeling",
+    "title": "Пилинг PRX-T33",
+    "category": "Уход",
+    "price": "4 800 ₽",
+    "duration": "45 мин.",
+    "description": "Инновационная ревитализация кожи без реабилитации и шелушения.",
+    "image": "/img/pill.png",
+    "indications": ["Морщины", "Потеря упругости"],
+    "contraindications": ["Беременность", "Раны"]
+  },
+  {
+    "id": "massage",
+    "title": "Массаж лица (скульптурный)",
+    "category": "Уход",
+    "price": "2 900 ₽",
+    "duration": "40 мин.",
+    "description": "Естественный лифтинг, улучшение кровотока и четкий овал лица.",
+    "image": "/img/skyl.webp",
+    "indications": ["Отечность", "Потеря четкости овала"],
+    "contraindications": ["Травмы", "Воспаления"]
+  },
+  {
+    "id": "day-makeup",
+    "title": "Дневной макияж",
+    "category": "Макияж",
+    "price": "2 500 ₽",
+    "duration": "45 мин.",
+    "description": "Лёгкий и естественный образ на каждый день.",
+    "image": "/img/dnev.webp",
+    "indications": ["Ежедневный образ"],
+    "contraindications": []
+  },
+  {
+    "id": "evening-makeup",
+    "title": "Вечерний макияж",
+    "category": "Макияж",
+    "price": "3 500 ₽",
+    "duration": "60-90 мин.",
+    "description": "Яркий и выразительный образ для особых мероприятий.",
+    "image": "/img/dnev.webp",
+    "indications": ["Торжество"],
+    "contraindications": []
+  },
+  {
+    "id": "brow-styling",
+    "title": "Оформление бровей",
+    "category": "Макияж",
+    "price": "1 800 ₽",
+    "duration": "40 мин.",
+    "description": "Коррекция формы, окрашивание и ламинирование.",
+    "image": "/img/brovi.jpg",
+    "indications": ["Нечеткая форма"],
+    "contraindications": []
+  },
+  {
+    "id": "biorevitalization",
+    "title": "Биоревитализация",
+    "category": "Косметология",
+    "price": "7 000 ₽",
+    "duration": "60 мин.",
+    "description": "Инъекционное увлажнение кожи гиалуроновой кислотой для сияния и упругости.",
+    "image": "/img/bior.jpg",
+    "indications": ["Сухость кожи", "Снижение тонуса"],
+    "contraindications": ["Аллергия"]
+  },
+  {
+    "id": "mesotherapy",
+    "title": "Мезотерапия",
+    "category": "Косметология",
+    "price": "5 500 ₽",
+    "duration": "45-60 мин.",
+    "description": "Микроинъекции витаминных коктейлей для восстановления кожи.",
+    "image": "/img/mezo.png",
+    "indications": ["Акне", "Тусклый цвет"],
+    "contraindications": []
+  },
+  {
+    "id": "rf-lifting",
+    "title": "RF-лифтинг",
+    "category": "Косметология",
+    "price": "6 200 ₽",
+    "duration": "45 мин.",
+    "description": "Аппаратная подтяжка кожи радиочастотной энергией.",
+    "image": "/img/rf.jpg",
+    "indications": ["Дряблость кожи", "Морщины"],
+    "contraindications": ["Металлические импланты"]
+  }
+]

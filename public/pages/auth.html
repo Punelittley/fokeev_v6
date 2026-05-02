@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="/styles/auth.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+
+<body>
+
+    <header class="main-header">
+        <nav class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/services">Услуги</a></li>
+                <li><a href="/about">О нас</a></li>
+            </ul>
+
+            <div class="brand-logo" onclick="location.href='/'">
+                <h1>perfection</h1>
+                <span>esthetique clinic</span>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="/gallery">Галерея</a></li>
+                <li><a href="/contacts">Контакты</a></li>
+                <li><a href="/cart">Корзина</a></li>
+                <li id="auth-btn-container" class="auth-btn-loading">
+                    <a href="/auth" class="btn-main">Войти</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="auth-wrapper">
+        <div class="auth-card">
+            <div id="login-form">
+                <h2>Вход</h2>
+                <div id="login-error" class="error-msg"></div>
+                <input type="email" id="login-email" placeholder="Email">
+                <input type="password" id="login-password" placeholder="Пароль">
+                <button class="btn-main" onclick="handleLogin()">Войти</button>
+                <p onclick="toggleForm()">Нет аккаунта? Регистрация</p>
+            </div>
+
+            <div id="register-form" style="display:none;">
+                <h2>Регистрация</h2>
+                <div id="register-error" class="error-msg"></div>
+                <input type="text" id="reg-name" placeholder="Имя">
+                <input type="tel" id="reg-phone" placeholder="Телефон">
+                <input type="email" id="reg-email" placeholder="Email">
+                <input type="password" id="reg-password" placeholder="Пароль">
+                <button class="btn-main" onclick="handleRegister()">Создать аккаунт</button>
+                <p onclick="toggleForm()">Уже есть аккаунт? Войти</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="contact-strip">
+        <div class="contact-grid">
+            <div class="contact-box">
+                <h5>Консультации</h5>
+                <p>+7 (3532) 45-52-00</p>
+            </div>
+            <div class="contact-box">
+                <h5>Локация</h5>
+                <p>Оренбург, пр. Братьев Коростелёвых, 159</p>
+            </div>
+            <div class="contact-box">
+                <h5>Режим работы</h5>
+                <p>Пн — Вс: 09:00 - 19:00</p>
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/scripts/auth-status.js"></script>
+    <script src="/scripts/burger-menu.js"></script>
+    <script src="/scripts/toast.js"></script>
+    <script>
+        const EMAILJS_PUBLIC_KEY = 'nNvUvYktkE6fQu2XK';
+        const EMAILJS_SERVICE_ID = 'bdjbdhdjdbd@gmail.com';
+        const EMAILJS_REGISTER_TEMPLATE_ID = 'template_kamkkkq';
+
+        function getRuAuthError(message) {
+            if (message === 'Invalid login credentials') return 'Неверный email или пароль';
+            return message;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.emailjs && EMAILJS_PUBLIC_KEY && !EMAILJS_PUBLIC_KEY.includes('YOUR_EMAILJS_')) {
+                emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+            }
+        });
+
+        function toggleForm() {
+            const login = document.getElementById('login-form');
+            const reg = document.getElementById('register-form');
+            if (login.style.display === 'none') {
+                login.style.display = 'block';
+                reg.style.display = 'none';
+            } else {
+                login.style.display = 'none';
+                reg.style.display = 'block';
+            }
+        }
+
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+
+            errorEl.style.display = 'none';
+
+            if (!window.sbClient) return;
+
+            const { data, error } = await window.sbClient.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) {
+                errorEl.innerText = getRuAuthError(error.message);
+                errorEl.style.display = 'block';
+            } else {
+                showToast('Добро пожаловать!', 'success');
+                setTimeout(() => { location.href = '/profile'; }, 800);
+            }
+        }
+
+        async function handleRegister() {
+            const name = document.getElementById('reg-name').value;
+            const phone = document.getElementById('reg-phone').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const errorEl = document.getElementById('register-error');
+
+            errorEl.style.display = 'none';
+
+            if (!name || !phone || !email || !password) {
+                errorEl.innerText = "Пожалуйста, заполните все поля";
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            if (password.length < 6) {
+                errorEl.innerText = "Пароль должен быть не менее 6 символов";
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            if (!window.sbClient) return;
+
+            const { data, error } = await window.sbClient.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        full_name: name,
+                        phone: phone
+                    }
+                }
+            });
+
+            if (error) {
+                errorEl.innerText = getRuAuthError(error.message);
+                errorEl.style.display = 'block';
+            } else {
+                if (window.emailjs && !EMAILJS_PUBLIC_KEY.includes('YOUR_EMAILJS_') && !EMAILJS_SERVICE_ID.includes('YOUR_EMAILJS_') && !EMAILJS_REGISTER_TEMPLATE_ID.includes('YOUR_EMAILJS_')) {
+                    try {
+                        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_REGISTER_TEMPLATE_ID, {
+                            user_name: name,
+                            to_email: email,
+                            user_email: email,
+                            clinic_name: 'Perfection',
+                            subject: 'Спасибо за регистрацию на нашем сайте'
+                        });
+                    } catch (e) {
+                    }
+                }
+                showToast('Регистрация успешна! Теперь вы можете войти.', 'success', 4000);
+                toggleForm();
+            }
+        }
+    </script>
+</body>
+
+</html>

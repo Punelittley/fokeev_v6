@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Галерея</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="/styles/gallery.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="main-header">
+        <nav class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/services">Услуги</a></li>
+                <li><a href="/about">О нас</a></li>
+            </ul>
+
+            <div class="brand-logo" onclick="location.href='/'">
+                <h1>perfection</h1>
+                <span>esthetique clinic</span>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="/gallery">Галерея</a></li>
+                <li><a href="/contacts">Контакты</a></li>
+                <li><a href="/cart">Корзина</a></li>
+                <li id="auth-btn-container" class="auth-btn-loading">
+                    <a href="/auth" class="btn-main">Войти</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="gallery-container">
+        <section class="gallery-hero">
+            <h2>Эстетика Perfection</h2>
+            <p>Пространство, где каждая деталь продумана для вашего комфорта и вдохновения.</p>
+        </section>
+
+        <section class="gallery-grid">
+            <div class="gallery-item">
+                <img src="/img/XXqXL.webp" alt="Интерьер клиники">
+                <div class="gallery-overlay">
+                    <h4>Место работы</h4>
+                </div>
+            </div>
+
+            <div class="gallery-item">
+                <img src="/img/yxod.jpg" alt="Кабинет косметологии">
+                <div class="gallery-overlay">
+                    <h4>Уход</h4>
+                </div>
+            </div>
+
+            <div class="gallery-item">
+                <img src="/img/obor.png" alt="Оборудование">
+                <div class="gallery-overlay">
+                    <h4>Наши технологии</h4>
+                </div>
+            </div>
+
+            <div class="gallery-item">
+                <img src="/img/chistka.webp" alt="Процесс">
+                <div class="gallery-overlay">
+                    <h4>Процедура ухода</h4>
+                </div>
+            </div>
+
+            <div class="gallery-item">
+                <img src="/img/atm.avif" alt="Релакс">
+                <div class="gallery-overlay">
+                    <h4>Атмосфера</h4>
+                </div>
+            </div>
+
+            <div class="gallery-item">
+                <img src="/img/makuz.jpg" alt="Детали">
+                <div class="gallery-overlay">
+                    <h4>Макияж</h4>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="contact-strip">
+        <div class="contact-grid">
+            <div class="contact-box">
+                <h5>Консультации</h5>
+                <p>+7 (3532) 45-52-00</p>
+            </div>
+            <div class="contact-box">
+                <h5>Локация</h5>
+                <p>Оренбург, пр. Братьев Коростелёвых, 159</p>
+            </div>
+            <div class="contact-box">
+                <h5>Режим работы</h5>
+                <p>Пн — Вс: 09:00 - 19:00</p>
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/scripts/auth-status.js"></script>
+    <script src="/scripts/burger-menu.js"></script>
+</body>
+
+</html>

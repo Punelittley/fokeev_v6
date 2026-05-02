@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfection</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="/styles/index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="main-header">
+        <nav class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/services">Услуги</a></li>
+                <li><a href="/about">О нас</a></li>
+            </ul>
+
+            <div class="brand-logo" onclick="location.href='/'">
+                <h1>perfection</h1>
+                <span>esthetique clinic</span>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="/gallery">Галерея</a></li>
+                <li><a href="/contacts">Контакты</a></li>
+                <li><a href="/cart">Корзина</a></li>
+                <li id="auth-btn-container" class="auth-btn-loading">
+                    <a href="/auth" class="btn-main">Войти</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero-section">
+            <div class="hero-title">
+                <h2>Perfection</h2>
+                <h2 class="accent-text">of beauty</h2>
+            </div>
+            <p class="hero-description">
+                Пространство красоты, любви и заботы. Специальные предложения для наших клиентов каждый месяц
+            </p>
+        </section>
+
+        <section class="categories-section">
+            <div class="section-header">
+                <h3>Категории</h3>
+            </div>
+            <div class="grid-container">
+                <article class="category-item">
+                    <div class="category-image" style="background-image: url('/img/yxod.jpg')">
+                        <span>Уход</span>
+                    </div>
+                    <a href="services" class="category-link">УЗНАТЬ БОЛЬШЕ</a>
+                </article>
+
+                <article class="category-item">
+                    <div class="category-image" style="background-image: url('/img/makuz.jpg')">
+                        <span>Макияж</span>
+                    </div>
+                    <a href="services" class="category-link">УЗНАТЬ БОЛЬШЕ</a>
+                </article>
+
+                <article class="category-item">
+                    <div class="category-image" style="background-image: url('/img/zxc.png')">
+                        <span>Косметология</span>
+                    </div>
+                    <a href="services" class="category-link">УЗНАТЬ БОЛЬШЕ</a>
+                </article>
+            </div>
+        </section>
+        <section class="philosophy-section">
+            <div class="philosophy-content">
+                <h3>Красота как точная наука и высокое искусство</h3>
+                <p>
+                    В Perfection Room мы верим, что истинное преображение начинается с глубокого понимания физиологии и
+                    чувства прекрасного.
+                    Наш подход — это сочетание передовых аппаратных методик и персонального внимания к каждой детали
+                    вашего образа.
+                    Мы не просто предлагаем услуги, мы создаем пространство, где современная медицина встречается с
+                    премиальным комфортом.
+                </p>
+            </div>
+        </section>
+
+        <section class="quote-banner"
+            style="background-image: url('/img/zas.jpg'); background-size: cover; background-position: center;">
+            <div class="quote-content">
+            </div>
+        </section>
+    </main>
+
+    <footer class="contact-strip">
+        <div class="contact-grid">
+            <div class="contact-box">
+                <h5>Консультации</h5>
+                <p>+7 (3532) 45-52-00</p>
+            </div>
+            <div class="contact-box">
+                <h5>Локация</h5>
+                <p>Оренбург, пр. Братьев Коростелёвых, 159</p>
+            </div>
+            <div class="contact-box">
+                <h5>Режим работы</h5>
+                <p>Пн — Вс: 09:00 - 19:00</p>
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/scripts/auth-status.js"></script>
+    <script src="/scripts/burger-menu.js"></script>
+    <script>
+        document.querySelector('.search-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const val = e.target.querySelector('input').value;
+            if (val) alert('Ищем: ' + val);
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.category-item').forEach(el => {
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+    </script>
+</body>
+
+</html>

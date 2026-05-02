@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="/styles/cart.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <header class="main-header">
+        <nav class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/services">Услуги</a></li>
+                <li><a href="/about">О нас</a></li>
+            </ul>
+
+            <div class="brand-logo" onclick="location.href='/'">
+                <h1>perfection</h1>
+                <span>esthetique clinic</span>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="/gallery">Галерея</a></li>
+                <li><a href="/contacts">Контакты</a></li>
+                <li><a href="/cart">Корзина</a></li>
+                <li id="auth-btn-container" class="auth-btn-loading">
+                    <a href="/auth" class="btn-main">Войти</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="cart-container">
+        <section class="cart-header">
+            <h2>Корзина</h2>
+            <p>Ваш выбор процедур для преображения и заботы о себе.</p>
+        </section>
+
+        <section class="cart-list" id="cart-items-wrapper">
+            <div class="cart-empty-msg">
+                <p>Ваша корзина пока пуста.</p>
+                <a href="/services"
+                    style="color: var(--accent); text-decoration: underline; font-size: 14px; display: block; margin-top: 15px;">Перейти
+                    к выбору услуг</a>
+            </div>
+        </section>
+
+        <section class="cart-footer" id="cart-summary" style="display: none;">
+            <div class="cart-total">
+                Итого к оплате: <b id="total-price">0 ₽</b>
+            </div>
+            <button class="btn-main btn-checkout" onclick="handleCheckout()">Оформить визит</button>
+        </section>
+    </main>
+
+    <footer class="contact-strip">
+        <div class="contact-grid">
+            <div class="contact-box">
+                <h5>Консультации</h5>
+                <p>+7 (3532) 45-52-00</p>
+            </div>
+            <div class="contact-box">
+                <h5>Локация</h5>
+                <p>Оренбург, пр. Братьев Коростелёвых, 159</p>
+            </div>
+            <div class="contact-box">
+                <h5>Режим работы</h5>
+                <p>Пн — Вс: 09:00 - 19:00</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/scripts/auth-status.js"></script>
+    <script src="/scripts/burger-menu.js"></script>
+    <script src="/scripts/toast.js"></script>
+    <script>
+        const MASTERS = ["Анна С. (Косметолог)", "Елена В. (Эстетист)", "Марина Д. (Врач-дерматолог)"];
+        const SLOTS = ["10:00", "11:30", "13:00", "15:30", "17:00", "18:30"];
+
+        function getMinDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate() + 1).padStart(2, '0');
+            return yyyy + '-' + mm + '-' + dd;
+        }
+
+        function loadCart() {
+            const cart = JSON.parse(localStorage.getItem('perfection_cart')) || [];
+            const wrapper = document.getElementById('cart-items-wrapper');
+            const summary = document.getElementById('cart-summary');
+            const totalDisplay = document.getElementById('total-price');
+
+            if (cart.length === 0) {
+                wrapper.innerHTML = '<div class="cart-empty-msg"><p>Ваша корзина пока пуста.</p><a href="/services" style="color: var(--accent); text-decoration: underline; font-size: 14px; display: block; margin-top: 15px;">Перейти к выбору услуг</a></div>';
+                summary.style.display = 'none';
+                return;
+            }
+
+            summary.style.display = 'flex';
+            wrapper.innerHTML = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                const numericPrice = parseInt(item.price.replace(/[^0-9]/g, ''));
+                total += numericPrice;
+
+                const card = document.createElement('div');
+                card.className = 'cart-item';
+
+                let masterOptions = '<option value="">Выберите специалиста</option>';
+                MASTERS.forEach(m => {
+                    masterOptions += '<option value="' + m + '"' + (item.master === m ? ' selected' : '') + '>' + m + '</option>';
+                });
+
+                let slotOptions = '<option value="">Выберите время</option>';
+                SLOTS.forEach(s => {
+                    slotOptions += '<option value="' + s + '"' + (item.slot === s ? ' selected' : '') + '>' + s + '</option>';
+                });
+
+                card.innerHTML = `
+                    <div style="flex: 1;">
+                        <div class="cart-item__info">
+                            <h4>${item.title}</h4>
+                            <span>${item.category || 'Услуга клиники'}</span>
+                        </div>
+                        <div class="cart-item__booking">
+                            <input type="date" class="booking-select" min="${getMinDate()}" value="${item.date || ''}" onchange="updateBookingInfo(${index}, 'date', this.value)" style="font-family: inherit;" placeholder="Выберите дату">
+                            <select class="booking-select" onchange="updateBookingInfo(${index}, 'master', this.value)">
+                                ${masterOptions}
+                            </select>
+                            <select class="booking-select" onchange="updateBookingInfo(${index}, 'slot', this.value)">
+                                ${slotOptions}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="cart-item__price">${item.price}</div>
+                    <button class="btn-remove" onclick="removeFromCart(${index})">Удалить</button>
+                `;
+                wrapper.appendChild(card);
+            });
+
+            totalDisplay.innerText = total.toLocaleString('ru-RU') + ' ₽';
+        }
+
+        function updateBookingInfo(index, field, value) {
+            let cart = JSON.parse(localStorage.getItem('perfection_cart')) || [];
+            if (cart[index]) {
+                cart[index][field] = value;
+                localStorage.setItem('perfection_cart', JSON.stringify(cart));
+            }
+        }
+
+        function removeFromCart(index) {
+            let cart = JSON.parse(localStorage.getItem('perfection_cart')) || [];
+            cart.splice(index, 1);
+            localStorage.setItem('perfection_cart', JSON.stringify(cart));
+            loadCart();
+        }
+
+        async function handleCheckout() {
+            const btn = document.querySelector('.btn-checkout');
+            const cart = JSON.parse(localStorage.getItem('perfection_cart')) || [];
+            if (cart.length === 0) return;
+
+            const incomplete = cart.some(item => !item.master || !item.slot || !item.date);
+            if (incomplete) {
+                showToast('Пожалуйста, выберите дату, специалиста и удобное время для каждой услуги.', 'warning');
+                return;
+            }
+
+            if (!window.sbClient) {
+                showToast('Ошибка подключения к серверу. Попробуйте позже.', 'error');
+                return;
+            }
+
+            const { data: { user } } = await window.sbClient.auth.getUser();
+            if (!user) {
+                showToast('Пожалуйста, войдите в профиль, чтобы завершить бронирование.', 'warning', 4000);
+                setTimeout(() => { location.href = '/auth'; }, 1500);
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = 'Оформление...';
+
+            let total = 0;
+            cart.forEach(item => {
+                total += parseInt(item.price.replace(/[^0-9]/g, ''));
+            });
+
+            try {
+                const { error } = await window.sbClient
+                    .from('orders')
+                    .insert({
+                        user_id: user.id,
+                        items: cart,
+                        total_price: total
+                    });
+
+                if (error) throw error;
+
+                showToast('Ваш запис на визит успешно оформлен! Мы свяжемся с вами для подтверждения.', 'success', 5000);
+                localStorage.removeItem('perfection_cart');
+                setTimeout(() => { location.href = '/profile'; }, 2000);
+            } catch (err) {
+                showToast('Ошибка при оформлении: ' + err.message, 'error', 5000);
+                btn.disabled = false;
+                btn.innerText = 'Оформить визит';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCart);
+    </script>
+</body>
+
+</html>

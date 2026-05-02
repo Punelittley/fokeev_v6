@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>О Нас</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="/styles/about.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="main-header">
+        <nav class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/services">Услуги</a></li>
+                <li><a href="/about">О нас</a></li>
+            </ul>
+
+            <div class="brand-logo" onclick="location.href='/'">
+                <h1>perfection</h1>
+                <span>esthetique clinic</span>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="/gallery">Галерея</a></li>
+                <li><a href="/contacts">Контакты</a></li>
+                <li><a href="/cart">Корзина</a></li>
+                <li id="auth-btn-container" class="auth-btn-loading">
+                    <a href="/auth" class="btn-main">Войти</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main class="about-container">
+        <section class="about-hero">
+            <h2>Пространство Совершенства</h2>
+            <p>Perfection — это не просто клиника, это философия гармонии между современными технологиями и вашей
+                естественной красотой.</p>
+        </section>
+
+        <section class="about-section">
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Наша Миссия</h3>
+                    <p>Мы верим, что забота о себе — это акт любви к своему телу. Наша цель — подчеркнуть вашу
+                        индивидуальность, обеспечивая при этом высочайшие стандарты медицинской безопасности и комфорта
+                        премиум-класса.</p>
+                    <p>С 2018 года мы объединяем лучших специалистов в области эстетической косметологии и дерматологии,
+                        используя только сертифицированное оборудование мирового уровня.</p>
+                </div>
+                <div class="about-image">
+                    <img src="/img/zas.jpg" alt="Клиника Perfection">
+                </div>
+            </div>
+        </section>
+
+        <section class="values-section">
+            <div class="section-header">
+                <h3>Наши Ценности</h3>
+            </div>
+            <div class="values-grid">
+                <div class="value-item">
+                    <h4>Индивидуальность</h4>
+                    <p>Никаких шаблонов. Только персональный план коррекции и ухода.</p>
+                </div>
+                <div class="value-item">
+                    <h4>Безопасность</h4>
+                    <p>Медицинская лицензия и строгий контроль стерильности.</p>
+                </div>
+                <div class="value-item">
+                    <h4>Профессионализм</h4>
+                    <p>Врачи с опытом работы более 10 лет и постоянным обучением в Европе.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="contact-strip">
+        <div class="contact-grid">
+            <div class="contact-box">
+                <h5>Консультации</h5>
+                <p>+7 (3532) 45-52-00</p>
+            </div>
+            <div class="contact-box">
+                <h5>Локация</h5>
+                <p>Оренбург, пр. Братьев Коростелёвых, 159</p>
+            </div>
+            <div class="contact-box">
+                <h5>Режим работы</h5>
+                <p>Пн — Вс: 09:00 - 19:00</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/scripts/auth-status.js"></script>
+    <script src="/scripts/burger-menu.js"></script>
+</body>
+
+</html>

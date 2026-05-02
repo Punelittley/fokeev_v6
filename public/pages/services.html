@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Услуги</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="/styles/services.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header class="main-header">
+        <nav class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/services">Услуги</a></li>
+                <li><a href="/about">О нас</a></li>
+            </ul>
+
+            <div class="brand-logo" onclick="location.href='/'">
+                <h1>perfection</h1>
+                <span>esthetique clinic</span>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="/gallery">Галерея</a></li>
+                <li><a href="/contacts">Контакты</a></li>
+                <li><a href="/cart">Корзина</a></li>
+                <li id="auth-btn-container" class="auth-btn-loading">
+                    <a href="/auth" class="btn-main">Войти</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="services-container">
+        <div class="services-hero">
+            <h2>Наши Услуги</h2>
+            <p>Мы объединяем искусство и науку, чтобы подчеркнуть вашу естественную красоту и подарить уверенность в
+                себе.</p>
+        </div>
+
+        <section class="service-category" data-category="Уход">
+            <h3>Уход</h3>
+            <div class="services-grid" id="grid-уход">
+            </div>
+        </section>
+        <section class="service-category" data-category="Макияж">
+            <h3>Макияж</h3>
+            <div class="services-grid" id="grid-макияж">
+            </div>
+        </section>
+        <section class="service-category" data-category="Косметология">
+            <h3>Косметология</h3>
+            <div class="services-grid" id="grid-косметология">
+            </div>
+        </section>
+    </main>
+
+    <footer class="contact-strip">
+        <div class="contact-grid">
+            <div class="contact-box">
+                <h5>Консультации</h5>
+                <p>+7 (3532) 45-52-00</p>
+            </div>
+            <div class="contact-box">
+                <h5>Локация</h5>
+                <p>Оренбург, пр. Братьев Коростелёвых, 159</p>
+            </div>
+            <div class="contact-box">
+                <h5>Режим работы</h5>
+                <p>Пн — Вс: 09:00 - 19:00</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/scripts/auth-status.js"></script>
+    <script src="/scripts/burger-menu.js"></script>
+    <script src="/scripts/toast.js"></script>
+    <script>
+        async function addToCart(event, id, title, price, category) {
+            event.stopPropagation();
+            
+            if (window.sbClient) {
+                const { data: { user } } = await window.sbClient.auth.getUser();
+                if (!user) {
+                    showToast('Пожалуйста, войдите в аккаунт, чтобы добавить услугу в корзину', 'error');
+                    setTimeout(() => { location.href = '/auth'; }, 1500);
+                    return;
+                }
+            }
+
+            let cart = JSON.parse(localStorage.getItem('perfection_cart')) || [];
+            cart.push({ id, title, price, category });
+            localStorage.setItem('perfection_cart', JSON.stringify(cart));
+            showToast('Услуга "' + title + '" добавлена в корзину!', 'success');
+        }
+
+        async function loadServices() {
+            try {
+                const res = await fetch('/api/services');
+                if (!res.ok) return;
+                const services = await res.json();
+
+                if (services && services.length > 0) {
+                    services.forEach(svc => {
+                        const lowCat = (svc.category || 'Уход').toLowerCase();
+                        let grid = document.getElementById('grid-' + lowCat);
+                        
+                        if (!grid) {
+                            grid = document.querySelector('.services-grid');
+                        }
+
+                        let displayPrice = svc.price;
+                        if (displayPrice && !displayPrice.includes('₽')) {
+                            displayPrice += ' ₽';
+                        }
+
+                        const article = document.createElement('article');
+                        article.className = 'service-card';
+                        article.onclick = () => location.href = '/service-info?id=' + svc.id;
+
+                        article.innerHTML = `
+                            <div class="service-card__info">
+                                <h4>${svc.title}</h4>
+                                <p>${svc.description}</p>
+                                <div class="service-card__actions" style="justify-content: flex-end; width: 100%;">
+                                    <button class="btn-main btn-book-service" onclick="addToCart(event, '${svc.id}', '${svc.title.replace(/'/g, "\\'")}', '${displayPrice}', '${svc.category}')">В корзину</button>
+                                </div>
+                            </div>
+                            <span class="service-price">${displayPrice}</span>
+                        `;
+                        grid.appendChild(article);
+                    });
+                } else {
+                    document.querySelectorAll('.services-grid').forEach(g => {
+                        g.innerHTML = '<p style="color: var(--text-muted); font-size: 14px; padding: 20px;">Услуги в данной категории пока отсутствуют.</p>';
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to load services:", err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadServices);
+    </script>
+</body>
+
+</html>

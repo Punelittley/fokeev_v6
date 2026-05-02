@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Панель управления</title>
+    <link rel="stylesheet" href="/styles/common.css">
+    <link rel="stylesheet" href="/styles/admin.css">
+    <style>
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .custom-modal {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .custom-modal h3 {
+            margin-top: 0;
+            font-family: 'Playfair Display', serif;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .custom-modal p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid #e0e0e0;
+            background: #fff;
+            transition: all 0.3s;
+        }
+
+        .modal-btn-confirm {
+            background: #d9534f;
+            color: #fff;
+            border-color: #d9534f;
+        }
+
+        .modal-btn-confirm:hover {
+            background: #c9302c;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #f5f5f5;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="admin-body">
+
+    <header class="main-header">
+        <nav class="nav-container">
+            <ul class="nav-menu">
+                <li><a href="/">Главная</a></li>
+                <li><a href="/services">Услуги</a></li>
+                <li><a href="/about">О нас</a></li>
+            </ul>
+
+            <div class="brand-logo" onclick="location.href='/'">
+                <h1>perfection</h1>
+                <span>esthetique clinic</span>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="/gallery">Галерея</a></li>
+                <li><a href="/contacts">Контакты</a></li>
+                <li><a href="/cart">Корзина</a></li>
+                <li id="auth-btn-container" class="auth-btn-loading">
+                    <a href="/auth" class="btn-main">Войти</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="admin-container">
+        <div class="admin-header">
+            <h2>Управление заказами</h2>
+            <p>Просматривайте и управляйте записями клиентов вашей клиники.</p>
+        </div>
+
+        <div class="admin-tabs">
+            <button class="admin-tab-btn active" onclick="switchTab('tab-stats')">Статистика</button>
+            <button class="admin-tab-btn" onclick="switchTab('tab-orders')">Заказы</button>
+            <button class="admin-tab-btn" onclick="switchTab('tab-users')">Клиенты</button>
+            <button class="admin-tab-btn" onclick="switchTab('tab-catalog')">Услуги</button>
+            <button class="admin-tab-btn" onclick="switchTab('tab-services')">+ Новая услуга</button>
+        </div>
+
+        <div id="tab-stats" class="admin-tab-content active">
+            <div class="admin-stats-list">
+                <div class="stat-line">Всего пользователей: <b id="total-users">-</b></div>
+                <div class="stat-line">Всего заказов: <b id="total-orders">-</b></div>
+                <div class="stat-line">Общая выручка: <b id="total-revenue">- ₽</b></div>
+            </div>
+        </div>
+
+        <div id="tab-users" class="admin-tab-content">
+            <div class="orders-list" id="users-list">
+                <div style="text-align:center; padding: 40px; color: var(--text-muted);">Загрузка...</div>
+            </div>
+        </div>
+
+        <div id="tab-catalog" class="admin-tab-content">
+            <div class="orders-list" id="catalog-list">
+                <div style="text-align:center; padding: 40px; color: var(--text-muted);">Загрузка...</div>
+            </div>
+        </div>
+
+        <div id="tab-services" class="admin-tab-content">
+            <section class="admin-table-wrapper" style="margin-bottom: 40px; padding: 25px;">
+                <div class="admin-header" style="margin-bottom: 20px;">
+                    <h3>Добавление новой услуги</h3>
+                </div>
+                <form id="add-service-form" class="service-add-form"
+                    style="display: grid; gap: 15px; max-width: 500px;">
+                    <input type="text" id="service-title" placeholder="Название услуги" required
+                        style="padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; outline: none;">
+                    <select id="service-category" class="admin-select" required>
+                        <option value="" disabled selected>Выберите категорию</option>
+                        <option value="Уход">Уход</option>
+                        <option value="Макияж">Макияж</option>
+                        <option value="Косметология">Косметология</option>
+                    </select>
+                    <input type="text" id="service-price" placeholder="Цена (напр. '3 500 ₽')" required
+                        style="padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; outline: none;">
+                    <input type="text" id="service-duration" placeholder="Длительность (напр. '60 мин.')" required
+                        style="padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; outline: none;">
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: -10px;">Фотография услуги
+                        (необязательно)</div>
+                    <input type="file" id="service-image-file" accept="image/*"
+                        style="padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; outline: none; background: #fff;">
+                    <textarea id="service-description" placeholder="Описание услуги..." rows="4" required
+                        style="padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; outline: none; resize: none;"></textarea>
+                    <div class="dynamic-list-block">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px; font-weight: 600;">Показания</span>
+                            <button type="button" onclick="addListItem('indications-list')"
+                                style="background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px 12px; cursor: pointer; font-size: 13px;">+
+                                Добавить</button>
+                        </div>
+                        <div id="indications-list" style="display: grid; gap: 8px;"></div>
+                    </div>
+                    <div class="dynamic-list-block">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 14px; font-weight: 600;">Противопоказания</span>
+                            <button type="button" onclick="addListItem('contraindications-list')"
+                                style="background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px 12px; cursor: pointer; font-size: 13px;">+
+                                Добавить</button>
+                        </div>
+                        <div id="contraindications-list" style="display: grid; gap: 8px;"></div>
+                    </div>
+
+                    <button type="submit" class="btn-main">Добавить услугу</button>
+                    <div id="service-add-status" style="font-size: 14px;"></div>
+                </form>
+            </section>
+        </div>
+
+        <div id="tab-orders" class="admin-tab-content">
+            <div class="orders-list" id="orders-list">
+            </div>
+        </div>
+    </main>
+
+    <div id="confirm-modal" class="custom-modal-overlay">
+        <div class="custom-modal">
+            <h3 id="modal-title">Подтверждение</h3>
+            <p id="modal-message">Вы уверены, что хотите выполнить это действие?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="closeConfirmModal()">Отмена</button>
+                <button class="modal-btn modal-btn-confirm" id="modal-confirm-btn">Выполнить</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-user-modal" class="custom-modal-overlay">
+        <div class="custom-modal" style="max-width: 500px; text-align: left;">
+            <h3>Редактирование профиля</h3>
+            <form id="edit-user-form" style="display: grid; gap: 15px;">
+                <input type="hidden" id="edit-user-id">
+                 <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Email</label>
+                    <input type="email" id="edit-user-email" placeholder="email@example.com" required 
+                        style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Пароль (оставьте пустым, если не хотите менять)</label>
+                    <input type="password" id="edit-user-password" placeholder="Новый пароль" 
+                        style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">ФИО</label>
+                    <input type="text" id="edit-user-name" placeholder="Полное имя" required 
+                        style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Телефон</label>
+                    <input type="text" id="edit-user-phone" placeholder="Телефон" 
+                        style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                </div>
+                <div class="field-group">
+                    <label style="font-size: 13px; display: block; margin-bottom: 5px;">Дата рождения</label>
+                    <input type="date" id="edit-user-birthdate" 
+                        style="width: 100%; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px;">
+                </div>
+                <div class="modal-buttons" style="margin-top: 10px;">
+                    <button type="button" class="modal-btn modal-btn-cancel" onclick="closeEditUserModal()">Отмена</button>
+                    <button type="submit" class="modal-btn modal-btn-confirm" style="background: var(--accent); border-color: var(--accent);">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="contact-strip">
+        <div class="contact-grid">
+            <div class="contact-box">
+                <h5>Консультации</h5>
+                <p>+7 (3532) 45-52-00</p>
+            </div>
+            <div class="contact-box">
+                <h5>Локация</h5>
+                <p>Оренбург, пр. Братьев Коростелёвых, 159</p>
+            </div>
+            <div class="contact-box">
+                <h5>Режим работы</h5>
+                <p>Пн — Вс: 09:00 - 19:00</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="/scripts/auth-status.js"></script>
+    <script src="/scripts/burger-menu.js"></script>
+    <script>
+        function addListItem(containerId) {
+            const container = document.getElementById(containerId);
+            const row = document.createElement('div');
+            row.style.cssText = 'display: flex; gap: 8px; align-items: center;';
+            row.innerHTML = `
+                <input type="text" placeholder="Введите пункт..." style="flex: 1; padding: 10px; border: 1px solid #e0e0e0; border-radius: 4px; outline: none;">
+                <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; cursor: pointer; color: #d9534f; font-size: 18px; padding: 0 6px;" title="Удалить">&times;</button>
+            `;
+            container.appendChild(row);
+            row.querySelector('input').focus();
+        }
+        function switchTab(tabId) {
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.admin-tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            const headerTitle = document.querySelector('.admin-header h2');
+            const headerDesc = document.querySelector('.admin-header p');
+            if (tabId === 'tab-stats') {
+                headerTitle.innerText = "Общая статистика";
+                headerDesc.innerText = "Сводная информация по вашим клиентам и выручке.";
+            } else if (tabId === 'tab-orders') {
+                headerTitle.innerText = "Управление заказами";
+                headerDesc.innerText = "Просматривайте и управляйте записями клиентов вашей клиники.";
+            } else if (tabId === 'tab-users') {
+                headerTitle.innerText = "База клиентов";
+                headerDesc.innerText = "Список всех пользователей, совершавших записи на платформе.";
+            } else if (tabId === 'tab-catalog') {
+                headerTitle.innerText = "Каталог услуг";
+                headerDesc.innerText = "Просматривайте и удаляйте услуги, доступные для бронирования.";
+            } else if (tabId === 'tab-services') {
+                headerTitle.innerText = "Добавление новой услуги";
+                headerDesc.innerText = "Заполните форму для публикации новой процедуры.";
+            }
+        }
+
+        async function loadAdminData() {
+            if (!window.sbClient) return;
+            const { data: { user }, error: userError } = await window.sbClient.auth.getUser();
+            if (userError || !user) {
+                alert('Необходимо авторизоваться для доступа к админ-панели.');
+                location.href = '/auth';
+                return;
+            }
+            if (user.email !== 'admin131.gmail.com' && user.email !== 'admin131@gmail.com') {
+                alert('Доступ запрещен. У вас нет прав администратора.');
+                location.href = '/profile';
+                return;
+            }
+
+            try {
+                let orders = [];
+                let profilesData = [];
+                let { data: { session } } = await window.sbClient.auth.getSession();
+                if (!session) {
+                    const refreshed = await window.sbClient.auth.refreshSession();
+                    session = refreshed && refreshed.data ? refreshed.data.session : null;
+                }
+                const headers = {};
+                if (session && session.access_token) {
+                    headers.Authorization = 'Bearer ' + session.access_token;
+                }
+                const adminRes = await fetch('/api/admin/dashboard', { headers });
+                if (adminRes.ok) {
+                    const dashboard = await adminRes.json();
+                    orders = Array.isArray(dashboard.orders) ? dashboard.orders : [];
+                    profilesData = Array.isArray(dashboard.profiles) ? dashboard.profiles : [];
+                } else {
+                    const fail = await adminRes.json().catch(() => ({}));
+                    throw new Error(fail.error || 'admin_dashboard_error');
+                }
+
+                const profilesMap = {};
+                if (profilesData) {
+                    profilesData.forEach(p => profilesMap[p.id] = p);
+                    document.getElementById('total-users').innerText = profilesData.length;
+                } else {
+                    document.getElementById('total-users').innerText = 'Ошибка';
+                }
+
+                renderOrders(orders, profilesMap);
+                renderUsers(orders, profilesMap, profilesData);
+                try {
+                    const res = await fetch('/api/services');
+                    if (res.ok) {
+                        const customServices = await res.json();
+                        renderCatalog(customServices);
+                    }
+                } catch (e) {
+                    console.error("Failed to load catalog", e);
+                }
+
+                renderStats(orders);
+
+            } catch (err) {
+                console.error('Data load error:', err);
+                alert('Ошибка при загрузке данных: ' + err.message);
+            }
+        }
+
+        function normalizeOrderItems(items) {
+            if (Array.isArray(items)) return items;
+            if (typeof items === 'string') {
+                try {
+                    const parsed = JSON.parse(items);
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch (e) {
+                    return [];
+                }
+            }
+            return [];
+        }
+
+        function renderOrders(orders, profilesMap = {}) {
+            const list = document.getElementById('orders-list');
+            list.innerHTML = '';
+
+            if (orders.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">Заказов пока нет.</div>';
+                return;
+            }
+
+            orders.forEach(order => {
+                const date = new Date(order.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                const clientProfile = profilesMap[order.user_id] || {};
+                const clientName = clientProfile.full_name || 'Неизвестный клиент';
+                const orderItems = normalizeOrderItems(order.items);
+                const total = Number(order.total_price || 0);
+
+                const itemsHtml = orderItems.length > 0
+                    ? orderItems.map(i => `<span style="display:inline-block; margin-right: 20px; margin-bottom: 5px; color: var(--text-main);">• ${i.title} <span style="color:#999; font-size:12px;">(${i.date || 'н/д'}, ${i.master || 'н/д'}, ${i.slot || 'н/д'})</span></span>`).join('')
+                    : '<span style="color:#999;">Состав заказа недоступен</span>';
+
+                const card = document.createElement('div');
+                card.className = 'order-line-item';
+                card.innerHTML = `
+                    <div class="order-line-item__header">
+                        <span class="order-line-item__date">${date} <b style="color:var(--text-main); margin-left: 10px;">${clientName}</b></span>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <span class="status-badge status-confirmed">Подтвержден</span>
+                            <span class="order-line-item__total">${total.toLocaleString('ru-RU')} ₽</span>
+                            <button style="color: #d9534f; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 13px;" onclick="cancelOrderAsAdmin('${order.id}')">Отменить</button>
+                        </div>
+                    </div>
+                    <div class="order-line-item__body">
+                        ${itemsHtml}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function renderStats(orders) {
+            document.getElementById('total-orders').innerText = orders.length;
+            const revenue = orders.reduce((sum, order) => sum + Number(order.total_price || 0), 0);
+            document.getElementById('total-revenue').innerText = revenue.toLocaleString('ru-RU') + ' ₽';
+        }
+
+        function renderUsers(orders, profilesMap = {}, profilesData = []) {
+            const list = document.getElementById('users-list');
+            list.innerHTML = '';
+
+            if (!profilesData || profilesData.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">Зарегистрированных пользователей пока нет.</div>';
+                return;
+            }
+
+            profilesData.forEach(profile => {
+                let orderCount = 0;
+                let sum = 0;
+                let lastDate = 'Нет заказов';
+
+                orders.forEach(o => {
+                    if (o.user_id === profile.id) {
+                        orderCount++;
+                        sum += Number(o.total_price || 0);
+                        if (lastDate === 'Нет заказов' || new Date(o.created_at) > new Date(lastDate)) {
+                            lastDate = o.created_at;
+                        }
+                    }
+                });
+
+                const formattedDate = lastDate !== 'Нет заказов' ? new Date(lastDate).toLocaleDateString('ru-RU') : lastDate;
+                const name = profile.full_name || 'Аноним';
+                const phone = profile.phone || 'Нет телефона';
+
+                const card = document.createElement('div');
+                card.className = 'order-line-item';
+                card.innerHTML = `
+                    <div class="order-line-item__header">
+                        <div style="display: flex; flex-direction: column;">
+                            <span class="order-line-item__date" style="font-size: 16px; color: var(--text-main); font-weight: bold;">${name}</span>
+                            <span style="font-size: 13px; color: var(--text-muted);">${profile.email || 'Нет почты'} • ${phone}</span>
+                        </div>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <span class="order-line-item__total" style="color:var(--text-main);">Выручка: ${sum.toLocaleString('ru-RU')} ₽</span>
+                            <button style="color: var(--accent); background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 13px;" onclick='openEditUserModal("${profile.id}", ${JSON.stringify(profile).replace(/'/g, "&apos;")})'>Изменить</button>
+                            <button style="color: #d9534f; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 13px;" onclick="deleteUser('${profile.id}')">Удалить</button>
+                        </div>
+                    </div>
+                    <div class="order-line-item__body">
+                        Всего бронирований: <b>${orderCount}</b>. Последний визит: ${formattedDate}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        function renderCatalog(services) {
+            const list = document.getElementById('catalog-list');
+            list.innerHTML = '';
+
+            if (services.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">Услуг пока нет. Вы можете добавить их во вкладке "+ Новая услуга".</div>';
+                return;
+            }
+
+            services.forEach(svc => {
+                const card = document.createElement('div');
+                card.className = 'order-line-item';
+                card.innerHTML = `
+                    <div class="order-line-item__header">
+                        <span class="order-line-item__date" style="font-size: 16px; color: var(--text-main); font-weight: bold;">${svc.title}</span>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <span class="order-line-item__total" style="color:var(--text-main);">${svc.price}</span>
+                            <button style="color: #d9534f; background: none; border: none; cursor: pointer; text-decoration: underline; font-size: 13px;" onclick="deleteService('${svc.id}')">Удалить</button>
+                        </div>
+                    </div>
+                    <div class="order-line-item__body">
+                        Категория: <i>${svc.category}</i>. Длительность: ${svc.duration}
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        async function deleteService(id) {
+            showConfirmModal("Удаление услуги", "Вы уверены, что хотите окончательно удалить эту услугу из каталога?", async () => {
+                try {
+                    const { data: { session } } = await window.sbClient.auth.getSession();
+                    const res = await fetch('/api/services/' + id, { 
+                        method: 'DELETE',
+                        headers: {
+                            Authorization: 'Bearer ' + session.access_token
+                        }
+                    });
+                    if (res.ok) {
+                        alert('Услуга успешно удалена!');
+                        loadAdminData();
+                    } else {
+                        const err = await res.json().catch(() => ({}));
+                        alert('Ошибка: ' + (err.error || 'Не удалось удалить услугу'));
+                    }
+                } catch (e) {
+                    alert('Сетевая ошибка: ' + e.message);
+                }
+            });
+        }
+
+        async function deleteUser(userId) {
+            showConfirmModal("Удаление пользователя", "ВНИМАНИЕ: Пользователь будет полностью удален из базы данных и системы авторизации. Это действие необратимо. Продолжить?", async () => {
+                try {
+                    const { data: { session } } = await window.sbClient.auth.getSession();
+                    if (!session || !session.access_token) throw new Error('Сессия истекла');
+
+                    const res = await fetch('/api/admin/users/' + userId, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + session.access_token
+                        }
+                    });
+
+                    const data = await res.json().catch(() => ({}));
+                    if (res.ok) {
+                        alert('Пользователь успешно удален');
+                        loadAdminData();
+                    } else {
+                        alert('Ошибка при удалении: ' + (data.error || 'неизвестная ошибка'));
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert('Ошибка: ' + e.message);
+                }
+            });
+        }
+
+        async function cancelOrderAsAdmin(orderId) {
+            showConfirmModal("Отмена заказа", "Вы уверены, что хотите отменить этот заказ?", async () => {
+                try {
+                    const { data: { session } } = await window.sbClient.auth.getSession();
+                    if (!session || !session.access_token) {
+                        throw new Error('Сессия истекла');
+                    }
+                    const res = await fetch('/api/orders/' + orderId, {
+                        method: 'DELETE',
+                        headers: {
+                            Authorization: 'Bearer ' + session.access_token
+                        }
+                    });
+                    const payload = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        throw new Error(payload.error || 'Не удалось отменить заказ');
+                    }
+                    alert('Заказ отменен');
+                    loadAdminData();
+                } catch (e) {
+                    alert('Ошибка: ' + e.message);
+                }
+            });
+        }
+
+        function showConfirmModal(title, message, onConfirm) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            const confirmBtn = document.getElementById('modal-confirm-btn');
+            
+            const newBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+            
+            newBtn.onclick = async () => {
+                closeConfirmModal();
+                await onConfirm();
+            };
+            
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').style.display = 'none';
+        }
+
+        function openEditUserModal(userId, profile) {
+            document.getElementById('edit-user-id').value = userId;
+            document.getElementById('edit-user-email').value = profile.email || '';
+            document.getElementById('edit-user-email').dataset.original = profile.email || '';
+            document.getElementById('edit-user-password').value = '';
+            document.getElementById('edit-user-name').value = profile.full_name || '';
+            document.getElementById('edit-user-phone').value = profile.phone || '';
+            document.getElementById('edit-user-birthdate').value = profile.birthdate || '';
+            document.getElementById('edit-user-modal').style.display = 'flex';
+        }
+
+        function closeEditUserModal() {
+            document.getElementById('edit-user-modal').style.display = 'none';
+        }
+
+        document.getElementById('edit-user-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('edit-user-id').value;
+            const emailInput = document.getElementById('edit-user-email');
+            const currentEmail = (emailInput.value || '').trim();
+            const originalEmail = (emailInput.dataset.original || '').trim();
+            const updates = {
+                full_name: document.getElementById('edit-user-name').value,
+                phone: document.getElementById('edit-user-phone').value,
+                birthdate: document.getElementById('edit-user-birthdate').value || null
+            };
+            if (currentEmail && currentEmail !== originalEmail) updates.email = currentEmail;
+
+            const newPass = document.getElementById('edit-user-password').value;
+            if (newPass) updates.password = newPass;
+
+            try {
+                const { data: { session } } = await window.sbClient.auth.getSession();
+                const res = await fetch('/api/admin/users/' + userId, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (session?.access_token || '')
+                    },
+                    body: JSON.stringify(updates)
+                });
+
+                if (res.ok) {
+                    alert('Данные успешно обновлены');
+                    closeEditUserModal();
+                    loadAdminData();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert('Ошибка обновления: ' + (err.error || 'неизвестная ошибка'));
+                }
+            } catch (err) {
+                alert('Сетевая ошибка: ' + err.message);
+            }
+        });
+
+        async function handleLogout() {
+            if (window.sbClient) {
+                await window.sbClient.auth.signOut();
+                location.href = '/auth';
+            }
+        }
+
+        document.getElementById('add-service-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusEl = document.getElementById('service-add-status');
+            statusEl.innerText = "Чтение файла...";
+            statusEl.style.color = "var(--text-color)";
+
+            const fileInput = document.getElementById('service-image-file');
+            let base64Image = '';
+
+            if (fileInput.files && fileInput.files[0]) {
+                try {
+                    base64Image = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => resolve(event.target.result);
+                        reader.onerror = (err) => reject(err);
+                        reader.readAsDataURL(fileInput.files[0]);
+                    });
+                } catch (err) {
+                    statusEl.innerText = "Ошибка чтения картинки.";
+                    statusEl.style.color = "red";
+                    return;
+                }
+            }
+
+            statusEl.innerText = "Добавление...";
+
+            const indications = [];
+            document.querySelectorAll('#indications-list input').forEach(inp => {
+                if (inp.value.trim()) indications.push(inp.value.trim());
+            });
+
+            const contraindications = [];
+            document.querySelectorAll('#contraindications-list input').forEach(inp => {
+                if (inp.value.trim()) contraindications.push(inp.value.trim());
+            });
+
+            const newService = {
+                title: document.getElementById('service-title').value,
+                category: document.getElementById('service-category').value,
+                price: document.getElementById('service-price').value,
+                duration: document.getElementById('service-duration').value,
+                description: document.getElementById('service-description').value,
+                image: base64Image,
+                indications: indications,
+                contraindications: contraindications
+            };
+
+            try {
+                const { data: { session } } = await window.sbClient.auth.getSession();
+                const res = await fetch('/api/services', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + (session?.access_token || '')
+                    },
+                    body: JSON.stringify(newService)
+                });
+
+                if (res.ok) {
+                    statusEl.innerText = "Услуга успешно добавлена!";
+                    statusEl.style.color = "green";
+                    document.getElementById('add-service-form').reset();
+                    document.getElementById('indications-list').innerHTML = '';
+                    document.getElementById('contraindications-list').innerHTML = '';
+                    loadAdminData();
+                } else {
+                    statusEl.innerText = "Ошибка при добавлении.";
+                    statusEl.style.color = "red";
+                }
+            } catch (err) {
+                statusEl.innerText = "Ошибка сервера: " + err.message;
+                statusEl.style.color = "red";
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadAdminData);
+    </script>
+</body>
+
+</html>
